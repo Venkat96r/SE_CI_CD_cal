@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE  = "venkat96r/imt2023102:jenkins"
-        PYTHON = "python"  // or "py" if that's how Python is installed
+        PYTHON = "C:\Program Files\Python313\python.exe"  // or "py" if that's how Python is installed
         VENV   = "venv"
     }
 
