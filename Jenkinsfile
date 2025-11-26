@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE = "prathamchawdhry/ci-cd-demo2:jenkins"
+        IMAGE = "venkat96r/imt2023102:jenkins"
         VENV = ".venv"
-        PYTHON = "/usr/bin/python3" 
+        PYTHON = "python"  // Windows Python command
     }
 
     stages {
@@ -14,7 +14,7 @@ pipeline {
                 checkout([$class: 'GitSCM',
                   branches: [[name: '*/main']],
                   userRemoteConfigs: [[
-                    url: 'https://github.com/pratham-chawdhry/ci-cd-demo2.git',
+                    url: 'https://github.com/Venkat96r/SE_CI_CD_cal.git',
                     credentialsId: 'github-creds'
                   ]]
                 ])
@@ -23,37 +23,45 @@ pipeline {
 
         stage('Create Virtual Environment') {
             steps {
-                sh '$PYTHON -m venv $VENV'
-                sh '$VENV/bin/pip install --upgrade pip'
+                powershell '''
+                  ${env:PYTHON} -m venv ${env:VENV}
+                  ${env:VENV}\\Scripts\\python -m pip install --upgrade pip
+                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh '$VENV/bin/pip install -r requirements.txt'
+                powershell '''
+                  ${env:VENV}\\Scripts\\pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh '$VENV/bin/pytest -v'
+                powershell '''
+                  ${env:VENV}\\Scripts\\pytest -v
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE .'
+                powershell '''
+                  docker build -t ${env:IMAGE} .
+                '''
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                withCredentials([usernamePassword(credentialsId: 'DOCKERCAL',
                                                   usernameVariable: 'USER',
                                                   passwordVariable: 'PASS')]) {
-                    sh '''
-                      echo $PASS | docker login -u $USER --password-stdin
-                      docker push $IMAGE
+                    powershell '''
+                      echo $env:PASS | docker login -u $env:USER --password-stdin
+                      docker push ${env:IMAGE}
                     '''
                 }
             }
@@ -61,11 +69,11 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                sh '''
-                  docker pull $IMAGE
-                  docker stop ci-cd-demo || true
-                  docker rm ci-cd-demo || true
-                  docker run -d -p 5000:5000 --name ci-cd-demo $IMAGE
+                powershell '''
+                  docker pull ${env:IMAGE}
+                  docker stop ci-cd-demo 2>$null
+                  docker rm ci-cd-demo 2>$null
+                  docker run -d -p 5000:5000 --name ci-cd-demo ${env:IMAGE}
                 '''
             }
         }
