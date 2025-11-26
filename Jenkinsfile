@@ -5,6 +5,7 @@ pipeline {
         IMAGE = "venkat96r/imt2023102:jenkins"
         VENV = ".venv"
         PYTHON = "C:\\Program Files\\Python313\\python.exe"
+        DOCKER_CRED = 'DOCKERCAL'
     }
 
     stages {
@@ -56,7 +57,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'DOCKERCAL',
+                withCredentials([usernamePassword(credentialsId: 'se_docker',
                                                   usernameVariable: 'USER',
                                                   passwordVariable: 'PASS')]) {
                     powershell '''
