@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE = "venkat96r/imt2023102:jenkins"
         VENV = ".venv"
-        PYTHON = "C:\\Users\\ramiv\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe"
+        PYTHON = "C:\\Program Files\\Python313"
     }
 
     stages {
