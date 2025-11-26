@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE = "venkat96r/imt2023102:jenkins"
-        VENV = ".venv"
-        PYTHON = "C:\\Program Files\\Python313\\python.exe"
-        DOCKER_CRED = 'DOCKERCAL'
+        IMAGE  = "venkat96r/imt2023102:jenkins"
+        PYTHON = "python"  // or "py" if that's how Python is installed
+        VENV   = "venv"
     }
 
     stages {
@@ -13,45 +12,37 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                  branches: [[name: '*/main']],
-                  userRemoteConfigs: [[
-                    url: 'https://github.com/Venkat96r/SE_CI_CD_cal.git',
-                    credentialsId: 'github-creds'
-                  ]]
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Venkat96r/SE_CI_CD_cal.git',
+                        credentialsId: 'GITHUBCAL'
+                    ]]
                 ])
             }
         }
 
         stage('Create Virtual Environment') {
             steps {
-                powershell '''
-                  & "${env:PYTHON}" -m venv ${env:VENV}
-                  & "${env:VENV}\\Scripts\\python.exe" -m pip install --upgrade pip
-                '''
+                bat '%PYTHON% -m venv %VENV%'
+                bat '%VENV%\\Scripts\\python -m pip install --upgrade pip'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                powershell '''
-                  & "${env:VENV}\\Scripts\\pip.exe" install -r requirements.txt
-                '''
+                bat '%VENV%\\Scripts\\pip install -r requirements.txt'
             }
         }
 
         stage('Run Tests') {
             steps {
-                powershell '''
-                  & "${env:VENV}\\Scripts\\pytest.exe" -v
-                '''
+                bat '%VENV%\\Scripts\\pytest -v'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                powershell '''
-                  docker build -t ${env:IMAGE} .
-                '''
+                bat 'docker build -t %IMAGE% .'
             }
         }
 
@@ -60,22 +51,22 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'docker-cred',
                                                   usernameVariable: 'USER',
                                                   passwordVariable: 'PASS')]) {
-                    powershell '''
-                      echo $env:PASS | docker login -u venkat96r --password-stdin
-                      docker push ${env:IMAGE}
-                    '''
+                    bat """
+                        echo %PASS% | docker login -u %USER% --password-stdin
+                        docker push %IMAGE%
+                    """
                 }
             }
         }
 
         stage('Deploy Container') {
             steps {
-                powershell '''
-                  docker pull ${env:IMAGE}
-                  docker stop ci-cd-demo 2>$null
-                  docker rm ci-cd-demo 2>$null
-                  docker run -d -p 5000:5000 --name ci-cd-demo ${env:IMAGE}
-                '''
+                bat """
+                    docker pull %IMAGE%
+                    docker stop ci-cd-demo || echo No container to stop
+                    docker rm ci-cd-demo || echo No container to remove
+                    docker run -d -p 5000:5000 --name ci-cd-demo %IMAGE%
+                """
             }
         }
     }
