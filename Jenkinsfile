@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE = "venkat96r/imt2023102:jenkins"
         VENV = ".venv"
-        PYTHON = "python"  // Windows Python command
+        PYTHON = "C:\\\\Users\\\\ramiv\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe"
     }
 
     stages {
@@ -24,8 +24,8 @@ pipeline {
         stage('Create Virtual Environment') {
             steps {
                 powershell '''
-                  ${env:PYTHON} -m venv ${env:VENV}
-                  ${env:VENV}\\Scripts\\python -m pip install --upgrade pip
+                  & "${env:PYTHON}" -m venv ${env:VENV}
+                  & "${env:VENV}\\Scripts\\python.exe" -m pip install --upgrade pip
                 '''
             }
         }
@@ -33,7 +33,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 powershell '''
-                  ${env:VENV}\\Scripts\\pip install -r requirements.txt
+                  & "${env:VENV}\\Scripts\\pip.exe" install -r requirements.txt
                 '''
             }
         }
@@ -41,7 +41,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 powershell '''
-                  ${env:VENV}\\Scripts\\pytest -v
+                  & "${env:VENV}\\Scripts\\pytest.exe" -v
                 '''
             }
         }
