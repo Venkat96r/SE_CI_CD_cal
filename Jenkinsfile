@@ -61,7 +61,7 @@ pipeline {
                                                   usernameVariable: 'USER',
                                                   passwordVariable: 'PASS')]) {
                     powershell '''
-                      echo $env:PASS | docker login -u $env:USER --password-stdin
+                      echo dckr_pat_zF6vKbY0L8TsqykEXi4-xleRRl8 | docker login -u venkat96r --password-stdin
                       docker push ${env:IMAGE}
                     '''
                 }
