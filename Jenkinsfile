@@ -57,11 +57,11 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'se_docker',
+                withCredentials([usernamePassword(credentialsId: 'docker-cred',
                                                   usernameVariable: 'USER',
                                                   passwordVariable: 'PASS')]) {
                     powershell '''
-                      echo dckr_pat_zF6vKbY0L8TsqykEXi4-xleRRl8 | docker login -u venkat96r --password-stdin
+                      echo $env:PASS | docker login -u venkat96r --password-stdin
                       docker push ${env:IMAGE}
                     '''
                 }
